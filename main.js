@@ -5,7 +5,8 @@ window.onload = function(){
     animation.init_area();
     //var ani = knit_animation(test_data, test_circles(a.container_bounding));
     var nn_structure = NN_structure(4, [2], 3);
-    var ani = knit_animation(test_data, [draw_nn_circles(animation.container_bounding, nn_structure)].concat(draw_nn_lines(animation.container_bounding, nn_structure)));
+    var stages = [draw_nn_circles(animation.container_bounding, nn_structure), ...draw_nn_lines(animation.container_bounding, nn_structure), ...many_line_changes(animation.container_bounding, nn_structure)];
+    var ani = knit_animation(test_data, stages);
     //var ani = knit_animation(test_data, [draw_nn_circles(animation.container_bounding, nn_structure)]);    
     animation.load_animation(ani);
     start_animation();

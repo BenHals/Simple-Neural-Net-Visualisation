@@ -22,6 +22,7 @@ class AnimElementRenderer{
         color.opacity = element.attrs.opacity;
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
+        ctx.lineWidth = element.attrs.lineWidth ? element.attrs.lineWidth : 1;
         ctx.beginPath();
         ctx.arc(parseInt(element.attrs.x),parseInt(element.attrs.y),parseInt(element.attrs.r),0,2*Math.PI);
         ctx.stroke();
@@ -32,6 +33,7 @@ class AnimElementRenderer{
         color.opacity = element.attrs.opacity;
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
+        ctx.lineWidth = element.attrs.lineWidth ? element.attrs.lineWidth : ctx.lineWidth;
         ctx.beginPath();
         ctx.moveTo(parseInt(element.attrs.x1), parseInt(element.attrs.y1));
         ctx.lineTo(parseInt(element.attrs.x2),parseInt(element.attrs.y2));

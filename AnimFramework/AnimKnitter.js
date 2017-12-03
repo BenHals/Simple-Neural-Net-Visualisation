@@ -164,7 +164,7 @@ function draw_nn_circles(bounds, data){
         var y = data.bounds.center_y - data.space_each_item * center_offset_index;
         new_circles["input"+i] = {el:new AnimElement("input"+i, "circle"), init:{x:data.bounds.left + (data.space_each_layer * layer_index),
                                                                                 y:y,
-                                                                                 color:"black" , opacity:0, r:10}};
+                                                                                 color:"black" , opacity:0, r:10, lineWidth:2}};
     }
     layer_index++;
     for(var i =0; i < data.num_HL.length; i++){
@@ -173,7 +173,7 @@ function draw_nn_circles(bounds, data){
             var y = data.bounds.center_y - data.space_each_item * center_offset_index;
             new_circles["hidden"+i+"_"+n] = {el:new AnimElement("hidden"+i+"_"+n, "circle"), init:{x:data.bounds.left + (data.space_each_layer * layer_index),
                                                                                                 y:y, 
-                                                                                                color:"black" , opacity:0, r:10}};
+                                                                                                color:"black" , opacity:0, r:10, lineWidth:2}};
         }
         layer_index++
     }
@@ -182,7 +182,7 @@ function draw_nn_circles(bounds, data){
         var y = data.bounds.center_y - data.space_each_item * center_offset_index;
         new_circles["output"+i] = {el:new AnimElement("output"+i, "circle"), init:{x:data.bounds.left + (data.space_each_layer * layer_index),
                                                                                 y:y,
-                                                                                 color:"black" , opacity:0, r:10}};
+                                                                                 color:"black" , opacity:0, r:10, lineWidth:2}};
     }
     stage.new_elements = new_circles;
 
@@ -204,7 +204,7 @@ function draw_nn_circles(bounds, data){
 function draw_nn_lines(bounds, data){
     var layers = [data.num_inputs].concat(data.num_HL.concat(data.num_outputs));
     var total_nodes = layers.reduce((a, c) => a+c);
-    var total_duration = 5;
+    var total_duration = 2;
     var stage = {stage_name: "circle_fade_in", stage_duration: 1};
     var stages = [];
     new_circles = {};
@@ -225,7 +225,7 @@ function draw_nn_lines(bounds, data){
                                                                                             y1:y_start,
                                                                                             x2:data.bounds.left + (data.space_each_layer * (l + 1)),
                                                                                             y2:y_end,
-                                                                                            color:"black" , opacity:0, r:10}};
+                                                                                            color:"black" , opacity:0, lineWidth:3}};
                 transitions["layer"+l+"_item" + i +"_line"+n] = ["layer"+l+"_item" + i +"_line"+n, ["opacity"], [1], [0], [1]];
             }
             stage.new_elements = new_circles;
@@ -235,3 +235,35 @@ function draw_nn_lines(bounds, data){
     }
     return stages;
 }
+
+function line_change(bounds, data){
+    var layers = [data.num_inputs].concat(data.num_HL.concat(data.num_outputs));
+    var stage = {stage_name: "circle_fade_in", stage_duration: 0.05};
+    new_circles = {};
+    stage.new_elements = new_circles;
+
+    transitions = {};
+    for(var n = 0; n < 1; n++){
+        var layer_index = getRandomInt(0, layers.length - 1);
+        var item_index = getRandomInt(0, layers[layer_index]);
+        var connection_index = getRandomInt(0, layers[layer_index + 1]);
+        transitions["layer"+layer_index+"_item" + item_index +"_line"+connection_index] = ["layer"+layer_index+"_item" + item_index +"_line"+connection_index,
+                                                                                        ["lineWidth"], [Math.random()*3], [0], [1]];
+    }
+    stage.element_transitions = transitions;
+    return stage;
+}
+
+function many_line_changes(bounds, data){
+    var stages = [];
+    for(var i = 0; i < 10000; i++){
+        stages.push(line_change(bounds, data));
+    }
+    return stages;
+}
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+  }
