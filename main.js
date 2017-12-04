@@ -1,10 +1,11 @@
 var animation;
 var nn ={input:[1,2,3,4], hidden:[1,2,3], output:[1,2,3]}
+var startup_delay = true;
 window.onload = function(){
     animation = new AnimController(document.getElementById("main_display"));
     animation.init_area();
     //var ani = knit_animation(test_data, test_circles(a.container_bounding));
-    var nn_structure = NN_structure(4, [2], 3);
+    var nn_structure = NN_structure(4, [10], 3);
     var stages = [draw_nn_circles(animation.container_bounding, nn_structure), ...draw_nn_lines(animation.container_bounding, nn_structure), ...many_line_changes(animation.container_bounding, nn_structure)];
     var ani = knit_animation(test_data, stages);
     //var ani = knit_animation(test_data, [draw_nn_circles(animation.container_bounding, nn_structure)]);    

@@ -31,14 +31,14 @@ function knit_animation(data, stages){
             elements[Object.keys(cur_stage.new_elements)[newe]].init_vals.push([st, Object.assign({}, element_attrs[Object.keys(cur_stage.new_elements)[newe]])]);
         }
 
-        // Assigning tracked attr values as initial values for stage.
-        animation.stages[st].initial_attrs = {};
-        for(var el = 0; el < updated_last_stage.length; el++){
-            var element = element_attrs[updated_last_stage[el]];
-            var element_init_vals = elements[updated_last_stage[el]].init_vals;
-            if(JSON.stringify(element_init_vals[element_init_vals.length -1][1]) != JSON.stringify(element)) element_init_vals.push([st, Object.assign({}, element)]);
-            //animation.stages[st].initial_attrs[Object.keys(element_attrs)[el]] = Object.assign({}, element);
-        }
+        // // Assigning tracked attr values as initial values for stage.
+        // animation.stages[st].initial_attrs = {};
+        // for(var el = 0; el < updated_last_stage.length; el++){
+        //     var element = element_attrs[updated_last_stage[el]];
+        //     var element_init_vals = elements[updated_last_stage[el]].init_vals;
+        //     if(JSON.stringify(element_init_vals[element_init_vals.length -1][1]) != JSON.stringify(element)) element_init_vals.push([st, Object.assign({}, element)]);
+        //     //animation.stages[st].initial_attrs[Object.keys(element_attrs)[el]] = Object.assign({}, element);
+        // }
         
         updated_last_stage = [];
         // Extracting transitions and updating tracked attrs.
@@ -51,6 +51,8 @@ function knit_animation(data, stages){
                 interpolators.push(d3.interpolate(element_attrs[transition_name][transition[1][attr_i]], transition[2][attr_i]));
                 element_attrs[transition_name][transition[1][attr_i]] = transition[2][attr_i];
             }
+
+            elements[transition_name].init_vals.push([st+1, Object.assign({}, element_attrs[transition_name])]);
             transition.push(interpolators);
             animation.stages[st].element_transitions[transition_name] = transition;
             updated_last_stage.push(transition_name);
@@ -164,7 +166,7 @@ function draw_nn_circles(bounds, data){
         var y = data.bounds.center_y - data.space_each_item * center_offset_index;
         new_circles["input"+i] = {el:new AnimElement("input"+i, "circle"), init:{x:data.bounds.left + (data.space_each_layer * layer_index),
                                                                                 y:y,
-                                                                                 color:"black" , opacity:0, r:10, lineWidth:2}};
+                                                                                 color:"black" , opacity:0, r:10, lineWidth:2, fill:"white", layer: 2}};
     }
     layer_index++;
     for(var i =0; i < data.num_HL.length; i++){
@@ -173,7 +175,7 @@ function draw_nn_circles(bounds, data){
             var y = data.bounds.center_y - data.space_each_item * center_offset_index;
             new_circles["hidden"+i+"_"+n] = {el:new AnimElement("hidden"+i+"_"+n, "circle"), init:{x:data.bounds.left + (data.space_each_layer * layer_index),
                                                                                                 y:y, 
-                                                                                                color:"black" , opacity:0, r:10, lineWidth:2}};
+                                                                                                color:"black" , opacity:0, r:10, lineWidth:2, fill:"white", layer: 2}};
         }
         layer_index++
     }
@@ -182,7 +184,7 @@ function draw_nn_circles(bounds, data){
         var y = data.bounds.center_y - data.space_each_item * center_offset_index;
         new_circles["output"+i] = {el:new AnimElement("output"+i, "circle"), init:{x:data.bounds.left + (data.space_each_layer * layer_index),
                                                                                 y:y,
-                                                                                 color:"black" , opacity:0, r:10, lineWidth:2}};
+                                                                                color:"black" , opacity:0, r:10, lineWidth:2, fill:"white", layer: 2}}; 
     }
     stage.new_elements = new_circles;
 
@@ -225,7 +227,7 @@ function draw_nn_lines(bounds, data){
                                                                                             y1:y_start,
                                                                                             x2:data.bounds.left + (data.space_each_layer * (l + 1)),
                                                                                             y2:y_end,
-                                                                                            color:"black" , opacity:0, lineWidth:3}};
+                                                                                            color:"black" , opacity:0, lineWidth:3, layer: 1}};
                 transitions["layer"+l+"_item" + i +"_line"+n] = ["layer"+l+"_item" + i +"_line"+n, ["opacity"], [1], [0], [1]];
             }
             stage.new_elements = new_circles;
@@ -238,17 +240,26 @@ function draw_nn_lines(bounds, data){
 
 function line_change(bounds, data){
     var layers = [data.num_inputs].concat(data.num_HL.concat(data.num_outputs));
-    var stage = {stage_name: "circle_fade_in", stage_duration: 0.05};
+    var stage = {stage_name: "circle_fade_in", stage_duration: 0.2};
     new_circles = {};
     stage.new_elements = new_circles;
 
     transitions = {};
-    for(var n = 0; n < 1; n++){
+    for(var n = 0; n < 10; n++){
         var layer_index = getRandomInt(0, layers.length - 1);
         var item_index = getRandomInt(0, layers[layer_index]);
         var connection_index = getRandomInt(0, layers[layer_index + 1]);
         transitions["layer"+layer_index+"_item" + item_index +"_line"+connection_index] = ["layer"+layer_index+"_item" + item_index +"_line"+connection_index,
                                                                                         ["lineWidth"], [Math.random()*3], [0], [1]];
+    }
+    for(var i = 0; i < layers.length; i++){
+        var item_index = getRandomInt(0, layers[i]);
+        var layer_name = i == 0 ? "input" : i== layers.length-1 ? "output" : "hidden" + (i - 1) + "_";
+
+        for(var n = 0; n <layers[i]; n++){
+            transitions[layer_name+n] = [layer_name+n, ["fill"], [n==item_index ? "black" : "white"], [0], [1]];
+        }
+
     }
     stage.element_transitions = transitions;
     return stage;
@@ -256,7 +267,7 @@ function line_change(bounds, data){
 
 function many_line_changes(bounds, data){
     var stages = [];
-    for(var i = 0; i < 10000; i++){
+    for(var i = 0; i < 1000; i++){
         stages.push(line_change(bounds, data));
     }
     return stages;

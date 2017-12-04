@@ -91,6 +91,17 @@ class AnimController{
         this.dynamic_layer_ctx.clearRect(0,0, this.container_bounding.width, this.container_bounding.height);
         this.renderer.render(this.dynamic_layer_ctx, this.animation.elements);
     }
+
+    add_stage(stage){
+        var element_attrs = {};
+        for(var ne = 0; ne < Object.keys(stage.new_elements).length; ne++){
+            this.elements[Object.keys(stage.new_elements)[ne]] = stage.new_elements[Object.keys(stage.new_elements)[ne]].el;
+            this.elements[Object.keys(stage.new_elements)[ne]].init_vals = [[-1, {active:false}]];
+            element_attrs[Object.keys(stage.new_elements)[ne]] = Object.assign({}, cur_stage.new_elements[Object.keys(cur_stage.new_elements)[newe]].init);
+            this.elements[Object.keys(cur_stage.new_elements)[newe]].init_vals.push([st, Object.assign({}, element_attrs[Object.keys(cur_stage.new_elements)[newe]])]);
+        }
+
+    }
 }
 
 
