@@ -54,6 +54,10 @@ class AnimController{
 
     load_stage(stage_num){
         this.current_stage = stage_num;
+        //test
+        if(stage_num == this.animation.stages.length - 1){
+            console.log("test");
+        }
         var element_names = Object.keys(this.animation.elements);
         //var initial_values = this.animation.stages[this.current_stage].initial_attrs;
         for(var e = 0; e<element_names.length; e++){
@@ -93,12 +97,35 @@ class AnimController{
     }
 
     add_stage(stage){
+        var current_percentage = window.t;
+        var current_time = current_percentage * this.animation.total_duration;
         var element_attrs = {};
+        this.animation.total_duration += stage.stage_duration;
+        window.t = current_time/this.animation.total_duration;
+        this.animation.stages.push({stage_name:stage.stage_name, stage_duration:stage.stage_duration});
         for(var ne = 0; ne < Object.keys(stage.new_elements).length; ne++){
-            this.elements[Object.keys(stage.new_elements)[ne]] = stage.new_elements[Object.keys(stage.new_elements)[ne]].el;
-            this.elements[Object.keys(stage.new_elements)[ne]].init_vals = [[-1, {active:false}]];
-            element_attrs[Object.keys(stage.new_elements)[ne]] = Object.assign({}, cur_stage.new_elements[Object.keys(cur_stage.new_elements)[newe]].init);
-            this.elements[Object.keys(cur_stage.new_elements)[newe]].init_vals.push([st, Object.assign({}, element_attrs[Object.keys(cur_stage.new_elements)[newe]])]);
+            this.animation.elements[Object.keys(stage.new_elements)[ne]] = stage.new_elements[Object.keys(stage.new_elements)[ne]].el;
+            this.animation.elements[Object.keys(stage.new_elements)[ne]].init_vals = [[-1, {active:false}]];
+            element_attrs[Object.keys(stage.new_elements)[ne]] = Object.assign({}, stage.new_elements[Object.keys(cur_stage.new_elements)[newe]].init);
+            this.animation.elements[Object.keys(cur_stage.new_elements)[newe]].init_vals.push([st, Object.assign({}, element_attrs[Object.keys(cur_stage.new_elements)[newe]])]);
+        }
+
+        this.animation.stages[this.animation.stages.length -1].element_transitions = {};
+        for(var t = 0; t<Object.keys(stage.element_transitions).length; t++){
+            var transition_name = Object.keys(stage.element_transitions)[t];
+            var transition = stage.element_transitions[transition_name];
+            var interpolators = [];
+            element_attrs[transition_name] = Object.assign({}, this.animation.elements[transition_name].init_vals[this.animation.elements[transition_name].init_vals.length - 1][1]);
+            for(var attr_i = 0; attr_i < transition[1].length; attr_i++){
+                interpolators.push(d3.interpolate(element_attrs[transition_name][transition[1][attr_i]], transition[2][attr_i]));
+                element_attrs[transition_name][transition[1][attr_i]] = transition[2][attr_i];
+            }
+
+            // Setting the next stages initial values to the updated ones from this transition.
+            this.animation.elements[transition_name].init_vals.push([this.animation.stages.length-1, Object.assign({}, element_attrs[transition_name])]);
+            transition.push(interpolators);
+            
+            this.animation.stages[this.animation.stages.length -1].element_transitions[transition_name] = transition;
         }
 
     }
@@ -116,6 +143,7 @@ function pauseToggle(){
     pause_save_val = pause;
 }
 function test_update(timestamp){
+    
     start_time = start_time == null ? timestamp : start_time;
     last_timestamp = last_timestamp == null ? timestamp : last_timestamp;
     var time_since_last = timestamp - last_timestamp;
@@ -131,8 +159,10 @@ function test_update(timestamp){
 }
 
 function animProg(val){
+    var nn_structure = NN_structure(4, [10], 3);
     t = parseFloat(val);
     window.animation.update_animation_percent(t);
+    //window.animation.add_stage(line_change(animation.container_bounding, nn_structure));
 }
 
 function start_animation(){

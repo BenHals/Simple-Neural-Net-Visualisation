@@ -5,13 +5,24 @@ window.onload = function(){
     animation = new AnimController(document.getElementById("main_display"));
     animation.init_area();
     //var ani = knit_animation(test_data, test_circles(a.container_bounding));
-    var nn_structure = NN_structure(4, [10], 3);
-    var stages = [draw_nn_circles(animation.container_bounding, nn_structure), ...draw_nn_lines(animation.container_bounding, nn_structure), ...many_line_changes(animation.container_bounding, nn_structure)];
+    var nn_structure = NN_structure(4, [10, 2], 4);
+    var stages = [draw_nn_circles(animation.container_bounding, nn_structure), ...draw_nn_lines(animation.container_bounding, nn_structure)];
     var ani = knit_animation(test_data, stages);
     //var ani = knit_animation(test_data, [draw_nn_circles(animation.container_bounding, nn_structure)]);    
     animation.load_animation(ani);
+    for(var i = 0; i < 0; i++) animation.add_stage(line_change(animation.container_bounding, nn_structure));
     start_animation();
     console.log(animation);
+    var stage_gen_worker = new Worker('AnimFramework/stage_gen_worker.js');
+    var count = 0;
+    stage_gen_worker.postMessage([animation.container_bounding, nn_structure]);
+    stage_gen_worker.onmessage = function(stage){
+        animation.add_stage(stage.data);
+        if(count < 1000){
+            stage_gen_worker.postMessage([animation.container_bounding, nn_structure]);
+            count++;
+        }
+    }
 };
 
 // Returns position data for drawing NN

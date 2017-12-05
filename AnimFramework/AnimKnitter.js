@@ -30,18 +30,9 @@ function knit_animation(data, stages){
             element_attrs[Object.keys(cur_stage.new_elements)[newe]] = Object.assign({}, cur_stage.new_elements[Object.keys(cur_stage.new_elements)[newe]].init);
             elements[Object.keys(cur_stage.new_elements)[newe]].init_vals.push([st, Object.assign({}, element_attrs[Object.keys(cur_stage.new_elements)[newe]])]);
         }
-
-        // // Assigning tracked attr values as initial values for stage.
-        // animation.stages[st].initial_attrs = {};
-        // for(var el = 0; el < updated_last_stage.length; el++){
-        //     var element = element_attrs[updated_last_stage[el]];
-        //     var element_init_vals = elements[updated_last_stage[el]].init_vals;
-        //     if(JSON.stringify(element_init_vals[element_init_vals.length -1][1]) != JSON.stringify(element)) element_init_vals.push([st, Object.assign({}, element)]);
-        //     //animation.stages[st].initial_attrs[Object.keys(element_attrs)[el]] = Object.assign({}, element);
-        // }
         
-        updated_last_stage = [];
         // Extracting transitions and updating tracked attrs.
+        updated_last_stage = [];
         animation.stages[st].element_transitions = {};
         for(var t = 0; t<Object.keys(cur_stage.element_transitions).length; t++){
             var transition_name = Object.keys(cur_stage.element_transitions)[t];
@@ -52,8 +43,10 @@ function knit_animation(data, stages){
                 element_attrs[transition_name][transition[1][attr_i]] = transition[2][attr_i];
             }
 
+            // Setting the next stages initial values to the updated ones from this transition.
             elements[transition_name].init_vals.push([st+1, Object.assign({}, element_attrs[transition_name])]);
             transition.push(interpolators);
+            
             animation.stages[st].element_transitions[transition_name] = transition;
             updated_last_stage.push(transition_name);
         }
