@@ -5,7 +5,9 @@ window.onload = function(){
     animation = new AnimController(document.getElementById("main_display"));
     animation.init_area();
     //var ani = knit_animation(test_data, test_circles(a.container_bounding));
-    var nn_structure = NN_structure(4, [10, 2], 4);
+    var layers = JSON.parse(getURLParameter(window.location.href, 'layers'));
+    layers = layers != null ? layers : [4, [10, 2], 4];
+    var nn_structure = NN_structure(...layers);
     var stages = [draw_nn_circles(animation.container_bounding, nn_structure), ...draw_nn_lines(animation.container_bounding, nn_structure)];
     var ani = knit_animation(test_data, stages);
     //var ani = knit_animation(test_data, [draw_nn_circles(animation.container_bounding, nn_structure)]);    
@@ -51,4 +53,21 @@ function NN_structure(num_inputs, num_HL, num_outputs){
     return {bounds:bounds, space_each_item:space_each_item, space_each_layer:space_each_layer, radius:radius, num_inputs:num_inputs,
         num_outputs:num_outputs, num_HL:num_HL};
 
+}
+
+function getURLParameter(url, param){
+    var paramValue = null;
+    var tempArray = url.split("?");
+    var baseURL = tempArray[0];
+    var additionalURL = tempArray[1];
+    if (additionalURL) {
+        tempArray = additionalURL.split("&");
+        for (var i=0; i<tempArray.length; i++){
+            if(tempArray[i].split('=')[0] == param){
+                paramValue = decodeURIComponent(tempArray[i].split('=')[1]);
+            }
+        }
+    }
+
+    return paramValue;
 }
