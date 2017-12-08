@@ -35,6 +35,9 @@ class AnimElementRenderer{
         var stroke_color = element.attrs.stroke ? d3.color(element.attrs.stroke) : color;
         stroke_color.opacity = element.attrs["stroke-opacity"] ? element.attrs["stroke-opacity"] : element.attrs.opacity;
         var fill_color = element.attrs.fill ? d3.color(element.attrs.fill) : color;
+        if(fill_color == null){
+            console.log(element.attrs["fill"]);
+        }
         fill_color.opacity = element.attrs["fill-opacity"] ? element.attrs["fill-opacity"] : element.attrs.opacity;
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;

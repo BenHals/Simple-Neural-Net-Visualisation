@@ -60,9 +60,14 @@ function knit_animation(data, stages){
 function anim_progress_time(time_since_start){
     time_since_start = Math.min(time_since_start, this.total_duration);
     var stage_index = 0;
+
     while(time_since_start > this.stages[stage_index].stage_duration){
+
         time_since_start -= this.stages[stage_index].stage_duration;
         stage_index++;
+        if(!this.stages[stage_index]){
+            return[this.stages.length -1, 1];
+        }
     }
     var prop_through = time_since_start/this.stages[stage_index].stage_duration;
 

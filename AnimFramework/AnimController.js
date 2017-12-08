@@ -159,7 +159,6 @@ function test_update(timestamp){
 }
 
 function animProg(val){
-    var nn_structure = NN_structure(4, [10], 3);
     t = parseFloat(val);
     window.animation.update_animation_percent(t);
     //window.animation.add_stage(line_change(animation.container_bounding, nn_structure));
