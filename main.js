@@ -6,7 +6,7 @@ window.onload = function(){
     animation.init_area();
     //var ani = knit_animation(test_data, test_circles(a.container_bounding));
     var layers = JSON.parse(getURLParameter(window.location.href, 'layers'));
-    layers = layers != null ? layers : [4, [10, 2], 4];
+    layers = layers != null ? layers : [4, [5], 2];
     var nn_structure = NN_structure(...layers);
     var stages = [draw_nn_circles(animation.container_bounding, nn_structure), ...draw_nn_lines(animation.container_bounding, nn_structure)];
     var ani = knit_animation(test_data, stages);
@@ -18,12 +18,33 @@ window.onload = function(){
     var stage_gen_worker = new Worker('AnimFramework/stage_gen_worker.js');
     var count = 0;
     var n_data = normalise(iris_data, ["class"]);
+    var test_data = [];
+    // for(var i = 0; i < 10000; i++){
+    //     var x1 = Math.random()*5;
+    //     var x2 = Math.random()*5;
+    //     var x3 = Math.random()*5;
+    //     var x4 = Math.random()*5;
+    //     var y = x1 * 1 + x2*2 + x3*3 + x4*4;
+    //     test_data.push({inputs:[x1, x2, x3, x4], outputs:[y]});
+    // }
+    //var n_data = test_data;
     nn_structure.data = n_data;
     nn_structure.index = count;
     stage_gen_worker.postMessage([animation.container_bounding, nn_structure]);
-    stage_gen_worker.onmessage = function(stage){
-        animation.add_stage(stage.data);
-        if(count < n_data.length){
+    
+
+    stage_gen_worker.onmessage = function(response){
+        var stages = response.data[0];
+        var error = response.data[1];
+        var weights = response.data[2];
+        var biases = response.data[3];
+        nn_structure.weights = weights;
+        nn_structure.biases = biases;
+        console.log(error);
+        for(var s = 0; s < stages.length; s++){
+            animation.add_stage(stages[s]);
+        }
+        if(count < 10000){
             stage_gen_worker.postMessage([animation.container_bounding, nn_structure]);
             count++;
             nn_structure.index = count;
@@ -57,15 +78,21 @@ function NN_structure(num_inputs, num_HL, num_outputs){
     var layers = [num_inputs, ...num_HL, num_outputs]
     var weights = [];
     var biases = [];
+    var activations = [[]];
+    for(var inputs = 0; inputs < layers[0]; inputs++){
+        activations[0].push(Math.random());
+    }
     for(var l = 1; l < layers.length; l++){
         weights.push([]);
-        biases.push([])
+        biases.push([]);
+        activations.push([]);
         for(var l2 = 0; l2 < layers[l]; l2++){
-            weights[l-1].push([])
+            weights[l-1].push([]);
             biases[l-1].push([]);
+            activations[l].push(Math.random());
             for(var l3 = 0; l3 < layers[l-1]; l3++){
-                weights[l-1][l2].push(0.5);
-                biases[l-1][l2].push(0.5);
+                weights[l-1][l2].push(Math.random());
+                biases[l-1][l2].push(0);
             }
         }
         // weights.push(Array(layers[l]).fill(Array(layers[l-1]).fill(0.5)));
@@ -73,7 +100,7 @@ function NN_structure(num_inputs, num_HL, num_outputs){
     }
 
     return {bounds:bounds, space_each_item:space_each_item, space_each_layer:space_each_layer, radius:radius, num_inputs:num_inputs,
-        num_outputs:num_outputs, num_HL:num_HL, biases:biases, weights:weights};
+        num_outputs:num_outputs, num_HL:num_HL, biases:biases, weights:weights, activations:activations};
 
 }
 
